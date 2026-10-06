@@ -1,0 +1,25 @@
+node_modules
+dist
+.env
+*.env.local
+backups/
+
+# Generated local artifacts
+test-results/
+public/uploads/
+uploads/
+logs/
+*.log
+*.pid
+.cache/
+coverage/
+demo/*.zip
+
+# Private material
+*.key
+*.pem
+*.p12
+*.pfx
+*.sqlite*
+*.db
+*.sql.gz

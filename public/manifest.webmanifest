@@ -1,0 +1,22 @@
+{
+  "name": "Unipass",
+  "short_name": "Unipass",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef2f7",
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/unipass-favicon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

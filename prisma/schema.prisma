@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String?  @unique
+  passwordHash String?
+
+  handle      String   @unique
+  displayName String
+  avatarUrl   String?
+  phone       String?  @unique
+  phoneCountry String?
+  locale      String   @default("ko")
+  isEmailVerified Boolean @default(false)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletionRequestedAt DateTime?
+  deletionScheduledAt DateTime?
+
+  oauthAccounts OAuthAccount[]
+  oauthPendingSessions OAuthPendingSession[]
+  refreshTokens RefreshToken[]
+  connectedServices UserService[]
+  loginEvents LoginEvent[]
+
+  @@map("users")
+}
+
+model Service {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  name      String
+  origin    String   @unique
+  iconUrl   String?
+  enabled   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users UserService[]
+
+  @@map("services")
+}
+
+model UserService {
+  id         String   @id @default(uuid())
+  userId     String
+  serviceId  String
+  firstUsedAt DateTime @default(now())
+  lastUsedAt  DateTime @default(now())
+  loginCount  Int      @default(1)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serviceId])
+  @@index([lastUsedAt])
+  @@map("user_services")
+}
+
+model OAuthAccount {
+  id         String   @id @default(uuid())
+  userId     String
+  provider   String
+  providerId String
+  email      String?
+  emailVerified Boolean @default(false)
+  phone      String?
+  phoneVerified Boolean @default(false)
+  displayName String?
+  avatarUrl String?
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([email])
+  @@index([phone])
+  @@map("oauth_accounts")
+}
+
+model OAuthPendingSession {
+  id         String   @id @default(uuid())
+  tokenHash String   @unique
+  action     String
+  targetUserId String?
+  provider   String
+  providerId String
+  email      String?
+  emailVerified Boolean @default(false)
+  phone      String?
+  phoneVerified Boolean @default(false)
+  displayName String
+  avatarUrl String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  targetUser User? @relation(fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("oauth_pending_sessions")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model LoginEvent {
+  id            String   @id @default(uuid())
+  userId        String
+  provider      String?
+  serviceKey    String?
+  serviceName   String?
+  serviceOrigin String?
+  ip            String?
+  country       String?
+  region        String?
+  city          String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@map("login_events")
+}
